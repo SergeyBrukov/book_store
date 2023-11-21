@@ -1,0 +1,40 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+version: '3.1'
+services:
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'
+
+  mysql:
+    image: 'mysql:8.0'
+    working_dir: /application
+    volumes:
+      - '.:/application'
+      - 'mysql_data:/var/lib/mysql'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=book_shop
+      - MYSQL_PASSWORD=root
+    ports:
+      - '3306:3306'
+
+  webserver:
+    image: 'nginx:alpine'
+    working_dir: /application
+    volumes:
+      - '.:/application'
+      - './docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
+    ports:
+      - '7000:80'
+
+  php-fpm:
+    build: docker/php-fpm
+    working_dir: /application
+    volumes:
+      - '.:/application'
+      - './docker/php-fpm/php-ini-overrides.ini:/etc/php/8.2/fpm/conf.d/99-overrides.ini'
+volumes:
+  mysql_data:
