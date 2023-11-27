@@ -7,6 +7,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use App\Controller\AuthController;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -75,6 +77,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Length(min: 5, max: 30, groups: ['registration:user'])]
     #[Groups(['registration:user', 'user:response'])]
     private ?string $lastName = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    #[Groups(['user:response'])]
+    private ?Basket $basket = null;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Book::class)]
+    #[Groups(['user:response'])]
+    private Collection $books;
+
+    public function __construct()
+    {
+        $this->books = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -166,6 +181,53 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getBasket(): ?Basket
+    {
+        return $this->basket;
+    }
+
+    public function setBasket(Basket $basket): static
+    {
+        // set the owning side of the relation if necessary
+        if ($basket->getUser() !== $this) {
+            $basket->setUser($this);
+        }
+
+        $this->basket = $basket;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Book>
+     */
+    public function getBooks(): Collection
+    {
+        return $this->books;
+    }
+
+    public function addBook(Book $book): static
+    {
+        if (!$this->books->contains($book)) {
+            $this->books->add($book);
+            $book->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBook(Book $book): static
+    {
+        if ($this->books->removeElement($book)) {
+            // set the owning side to null (unless already changed)
+            if ($book->getAuthor() === $this) {
+                $book->setAuthor(null);
+            }
+        }
 
         return $this;
     }
