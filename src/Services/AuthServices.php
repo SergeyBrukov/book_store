@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Entity\Basket;
 use App\Entity\User;
 use App\Model\LoginUserModel;
 use App\Model\RegistrationUserModel;
@@ -47,7 +48,8 @@ class AuthServices
             ->setPassword($registrationUserData->getPassword())
             ->setRoles($registrationUserData->getRoles())
             ->setFirstName($registrationUserData->getFirstName())
-            ->setLastName($registrationUserData->getLastName());
+            ->setLastName($registrationUserData->getLastName())
+            ->setBasket(new Basket());
 
         $errors = $this->validator->validate($user, null, ['registration:user']);
 
@@ -79,7 +81,7 @@ class AuthServices
         return new JsonResponse([
             'user'  => json_decode($serializeUser),
             'token' => $token
-        ]);
+        ], JsonResponse::HTTP_CREATED);
     }
 
     public function loginUser(LoginUserModel $loginUserData): JsonResponse
