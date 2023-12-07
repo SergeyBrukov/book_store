@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Controller\BasketItemController;
 use App\Repository\BasketItemRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -97,12 +98,5 @@ class BasketItem
     public function getBasket(): ?Basket
     {
         return $this->basket;
-    }
-
-    public function setBasket(?Basket $basket): static
-    {
-        $this->basket = $basket;
-
-        return $this;
     }
 }

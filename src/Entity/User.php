@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints\Length;
             uriTemplate         : 'profile',
             status              : JsonResponse::HTTP_OK,
             normalizationContext: ['groups' => ['user:profile', 'user:response']],
-            security            : "is_granted('ROLE_USER')"
+            security            : "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN')"
         ),
         new Post(
             routeName             : 'app_user_registration',
@@ -48,11 +48,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['registration:user'])]
+    #[Groups(['registration:user', 'info:order'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['registration:user', 'login:user', 'user:response'])]
+    #[Groups(['registration:user', 'login:user', 'user:response', 'info:order', 'collection-info:order'])]
     #[Email(groups: ['registration:user'])]
     private ?string $email = null;
 
@@ -70,12 +70,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 30)]
     #[Length(min: 5, max: 30, groups: ['registration:user'])]
-    #[Groups(['registration:user', 'user:response'])]
+    #[Groups(['registration:user', 'user:response', 'info:order', 'collection-info:order'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 30)]
     #[Length(min: 5, max: 30, groups: ['registration:user'])]
-    #[Groups(['registration:user', 'user:response'])]
+    #[Groups(['registration:user', 'user:response', 'info:order', 'collection-info:order'])]
     private ?string $lastName = null;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
@@ -86,9 +86,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:response'])]
     private Collection $books;
 
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Order::class)]
+    private Collection $orders;
+
     public function __construct()
     {
         $this->books = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,11 +127,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return array_unique($this->roles);
     }
 
     public function setRoles(array $roles): static
@@ -226,6 +226,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($book->getAuthor() === $this) {
                 $book->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            // set the owning side to null (unless already changed)
+            if ($order->getOwner() === $this) {
+                $order->setOwner(null);
             }
         }
 
