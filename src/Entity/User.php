@@ -45,6 +45,11 @@ use Symfony\Component\Validator\Constraints\Length;
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+
+    public const ROLE_ADMIN = "ROLE_ADMIN";
+    public const ROLE_CLIENT = "ROLE_CLIENT";
+
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

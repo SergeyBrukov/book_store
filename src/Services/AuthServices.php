@@ -19,12 +19,12 @@ class AuthServices
 
     public function __construct
     (
-        private UserPasswordHasherInterface $passwordHasher,
-        private JWTTokenManagerInterface    $JWTTokenManager,
-        private UserRepository              $userRepository,
-        private EntityManagerInterface      $entityManager,
-        private ValidatorInterface          $validator,
-        private SerializerInterface         $serializer
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly JWTTokenManagerInterface    $JWTTokenManager,
+        private readonly UserRepository              $userRepository,
+        private readonly EntityManagerInterface      $entityManager,
+        private readonly ValidatorInterface          $validator,
+        private readonly SerializerInterface $serializer
     )
     {
     }

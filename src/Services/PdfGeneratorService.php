@@ -12,6 +12,10 @@ class PdfGeneratorService
     private string $baseFolder = __DIR__;
     private string $storageWay = '/../storage';
 
+    /**
+     * @param Dompdf $dompdf
+     * @param Filesystem $filesystem
+     */
     public function __construct
     (
         Dompdf $dompdf,

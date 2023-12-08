@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Entity\DeliveryPaymentMethods;
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Entity\User;
 use App\Repository\BasketItemRepository;
 use App\Repository\DeliveryMethodsRepository;
 use App\Repository\OrderRepository;
@@ -22,15 +23,15 @@ class OrderService
 
     public function __construct
     (
-        private PdfGeneratorService       $pdfGeneratorService,
-        private DeliveryMethodsRepository $deliveryMethodsRepository,
-        private BasketItemRepository      $basketItemRepository,
-        private EntityManagerInterface    $entityManager,
-        private SerializerInterface       $serializer,
-        private UserRepository            $userRepository,
-        private OrderRepository           $orderRepository,
-        private Environment               $twig,
-        private TokenService              $tokenService
+        private readonly PdfGeneratorService       $pdfGeneratorService,
+        private readonly DeliveryMethodsRepository $deliveryMethodsRepository,
+        private readonly BasketItemRepository      $basketItemRepository,
+        private readonly EntityManagerInterface    $entityManager,
+        private readonly SerializerInterface       $serializer,
+        private readonly UserRepository            $userRepository,
+        private readonly OrderRepository           $orderRepository,
+        private readonly Environment               $twig,
+        private readonly TokenService              $tokenService
     )
     {
     }
@@ -156,7 +157,7 @@ class OrderService
             return new JsonResponse("Order $orderId not found", JsonResponse::HTTP_FORBIDDEN);
         }
 
-        if ($this->tokenService->getRoles()[0] === "ROLE_ADMIN") {
+        if ($this->tokenService->getRoles()[0] === User::ROLE_ADMIN) {
             $this->entityManager->remove($order);
             $this->entityManager->flush();
 

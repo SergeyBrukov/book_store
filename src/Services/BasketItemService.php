@@ -22,11 +22,11 @@ class BasketItemService
      * @param SerializerInterface $serializer
      */
     public function __construct(
-        private BasketRepository       $basketRepository,
-        private BookRepository         $bookRepository,
-        private EntityManagerInterface $entityManager,
-        private UserRepository         $userRepository,
-        private SerializerInterface    $serializer,
+        private readonly BasketRepository       $basketRepository,
+        private readonly BookRepository         $bookRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserRepository         $userRepository,
+        private readonly SerializerInterface    $serializer,
     )
     {
     }
