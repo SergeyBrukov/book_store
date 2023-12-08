@@ -43,7 +43,16 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+         - { path: ^/api/profile, roles: [ROLE_USER, ROLE_ADMIN] }
          - { path: ^/api/create-order, roles: ROLE_USER }
+         - { path: ^/api/add-book-in-basket, roles: ROLE_USER }
+         - { path: ^/api/decrement-book-from-basket/*, roles: ROLE_USER }
+         - { path: ^/api/delete-book-from-basket/*, roles: ROLE_USER }
+         - { path: ^/api/create-book, roles: ROLE_USER }
+         - { path: ^/api/create-delivery-method, roles: ROLE_ADMIN }
+         - { path: ^/api/create-order, roles: ROLE_USER }
+         - { path: ^/api/get-order/*, roles: [ROLE_USER, ROLE_ADMIN] }
+         - { path: ^/api/delete-order/*, roles: [ROLE_USER, ROLE_ADMIN] }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 

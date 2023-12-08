@@ -30,7 +30,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
             routeName: 'decrement-book-from-basket',
             status: JsonResponse::HTTP_OK,
             controller: BasketItemController::class,
-            denormalizationContext: ['groups' => ['decrement:']],
+            denormalizationContext: ['groups' => ['decrement:basketItem']],
             security: "is_granted('ROLE_USER')",
             name: "Decrement book from basket"
         ),
@@ -98,5 +98,12 @@ class BasketItem
     public function getBasket(): ?Basket
     {
         return $this->basket;
+    }
+
+    public function setBasket(?Basket $basket): self
+    {
+        $this->basket = $basket;
+
+        return $this;
     }
 }

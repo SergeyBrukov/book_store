@@ -21,10 +21,11 @@ use Symfony\Component\Validator\Constraints\Length;
 #[ApiResource(
     operations: [
         new Get(
-            uriTemplate         : 'profile',
+            routeName           : 'app_user_profile',
             status              : JsonResponse::HTTP_OK,
+            controller          : AuthController::class,
             normalizationContext: ['groups' => ['user:profile', 'user:response']],
-            security            : "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN')"
+            security            : "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN')",
         ),
         new Post(
             routeName             : 'app_user_registration',
@@ -46,7 +47,7 @@ use Symfony\Component\Validator\Constraints\Length;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
-    public const ROLE_ADMIN = "ROLE_ADMIN";
+    public const ROLE_ADMIN  = "ROLE_ADMIN";
     public const ROLE_CLIENT = "ROLE_CLIENT";
 
 
