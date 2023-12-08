@@ -58,4 +58,12 @@ class AuthController extends AbstractController
 
         return $this->authServices->loginUser($loginUserData);
     }
+
+    #[Route('/api/profile', name: 'app_user_profile', methods: ['GET'])]
+    public function profile(): JsonResponse
+    {
+        $userIdentification = $this->getUser()->getUserIdentifier();
+
+        return $this->authServices->userProfile($userIdentification);
+    }
 }

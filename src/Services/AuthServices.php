@@ -126,4 +126,23 @@ class AuthServices
             'token' => $token
         ]);
     }
+
+    /**
+     * @param string $userIdentification
+     * @return JsonResponse
+     */
+    public function userProfile(string $userIdentification):JsonResponse
+    {
+
+        $user = $this->userRepository->findOneBy(['email' => $userIdentification]);
+
+        if (!$user) {
+            return new JsonResponse('User not found', JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $userSerializedData = $this->serializer->serialize($user, 'json', ['groups' => ['user:profile', 'user:response']]);
+
+        return new JsonResponse(json_decode($userSerializedData), JsonResponse::HTTP_OK);
+
+    }
 }
