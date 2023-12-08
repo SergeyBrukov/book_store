@@ -10,7 +10,9 @@ services:
         class: Predis\Client
         arguments:
             - "tcp//redis:6379"
-
+    Dompdf\Dompdf:
+        arguments:
+            $options: ~
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
