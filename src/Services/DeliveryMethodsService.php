@@ -13,10 +13,10 @@ class DeliveryMethodsService
 {
     public function __construct
     (
-        private ValidatorInterface               $validator,
-        private EntityManagerInterface           $entityManager,
-        private DeliveryPaymentMethodsRepository $deliveryPaymentMethodsRepository,
-        private SerializerInterface              $serializer
+        private readonly ValidatorInterface               $validator,
+        private readonly EntityManagerInterface           $entityManager,
+        private readonly DeliveryPaymentMethodsRepository $deliveryPaymentMethodsRepository,
+        private readonly SerializerInterface              $serializer
     )
     {
     }

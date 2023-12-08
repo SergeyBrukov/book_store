@@ -11,11 +11,16 @@ class FileServices
 
     public function __construct
     (
-        private Filesystem $filesystem,
+        private readonly Filesystem $filesystem,
     )
     {
     }
 
+    /**
+     * @param mixed $data
+     * @param string $fileName
+     * @return void
+     */
     public function saveFile(mixed $data, string $fileName): void
     {
 

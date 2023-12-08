@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Book;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BookService
 {
     public function __construct
     (
-        private EntityManagerInterface $entityManager,
-        private UserRepository $userRepository,
-        private ValidatorInterface $validator,
-        private SerializerInterface $serializer
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserRepository         $userRepository,
+        private readonly ValidatorInterface     $validator,
+        private readonly SerializerInterface    $serializer
     )
     {
     }
@@ -56,7 +56,7 @@ class BookService
         $this->entityManager->persist($book);
         $this->entityManager->flush();
 
-        $serializerBook = $this->serializer->serialize($book,'json', ['groups' => ['info:book']]);
+        $serializerBook = $this->serializer->serialize($book, 'json', ['groups' => ['info:book']]);
 
         return new JsonResponse(json_decode($serializerBook), JsonResponse::HTTP_CREATED);
 
