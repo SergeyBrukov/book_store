@@ -84,6 +84,10 @@ class AuthServices
         ], JsonResponse::HTTP_CREATED);
     }
 
+    /**
+     * @param LoginUserModel $loginUserData
+     * @return JsonResponse
+     */
     public function loginUser(LoginUserModel $loginUserData): JsonResponse
     {
         $user = $this->userRepository->findOneBy(['email' => $loginUserData->getEmail()]);
