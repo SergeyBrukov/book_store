@@ -27,17 +27,20 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new GetCollection(
             uriTemplate         : 'get-orders',
+            status              : JsonResponse::HTTP_OK,
             normalizationContext: ['groups' => 'collection-info:order'],
             security            : "is_granted('ROLE_ADMIN')"
         ),
         new Get(
             routeName           : 'get-order-id',
+            status              : JsonResponse::HTTP_OK,
             controller          : OrderController::class,
             normalizationContext: ['groups' => ['info:order']],
             security            : "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN')"
         ),
         new Post(
             routeName             : 'create-order',
+            status                : JsonResponse::HTTP_CREATED,
             controller            : OrderController::class,
             normalizationContext  : ['groups' => ['info:order']],
             denormalizationContext: ['groups' => ['create:order']],

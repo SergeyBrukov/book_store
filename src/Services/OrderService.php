@@ -7,6 +7,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\User;
 use App\Repository\BasketItemRepository;
+use App\Repository\BasketRepository;
 use App\Repository\DeliveryMethodsRepository;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
@@ -26,6 +27,7 @@ class OrderService
         private readonly PdfGeneratorService       $pdfGeneratorService,
         private readonly DeliveryMethodsRepository $deliveryMethodsRepository,
         private readonly BasketItemRepository      $basketItemRepository,
+        private readonly BasketRepository          $basketRepository,
         private readonly EntityManagerInterface    $entityManager,
         private readonly SerializerInterface       $serializer,
         private readonly UserRepository            $userRepository,
@@ -57,10 +59,11 @@ class OrderService
      */
     public function createOrder(array $orderData, string $userIdentification): JsonResponse
     {
-
         $deliveryMethod = $this->deliveryMethodsRepository->find($orderData['deliveryMethod']);
 
         $user = $this->userRepository->findOneBy(['email' => $userIdentification]);
+
+        $basket = $this->basketRepository->findOneBy(['user' => $user->getId()]);
 
         if (!$deliveryMethod) {
             return new JsonResponse(['message' => 'Delivery method not exist'], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
@@ -89,6 +92,9 @@ class OrderService
 
                 $orderTotalCount = $orderTotalCount + $existOrderItem->getCount();
                 $orderTotalAmount = $orderTotalAmount + ($existOrderItem->getCount() * $existOrderItem->getBookInfo()->getPrice());
+
+                $basket->removeBasketItem($existOrderItem);
+                $this->entityManager->remove($existOrderItem);
 
                 $newOrder->addOrderProductItem($newOrderItem);
             } else {
