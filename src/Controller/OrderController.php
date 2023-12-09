@@ -19,9 +19,12 @@ use Twig\Error\SyntaxError;
 class OrderController extends AbstractController
 {
 
+    /**
+     * @param OrderService $orderService
+     */
     public function __construct
     (
-        private OrderService $orderService
+        private readonly OrderService $orderService
     )
     {
     }
@@ -41,12 +44,20 @@ class OrderController extends AbstractController
         return $this->orderService->createOrder($data, $userIdentification);
     }
 
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
     #[Route('/api/get-order/{id}', name: 'get-order-id', methods: ['GET'] )]
     public function getOrderById(string $id): JsonResponse
     {
        return $this->orderService->getOrderById($id);
     }
 
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
     #[Route('/api/delete-order/${id}', name: 'delete-order', methods: ['DELETE'])]
     public function deleteOrderById(string $id): JsonResponse
     {
