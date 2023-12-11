@@ -44,7 +44,7 @@ use Symfony\Component\Validator\Constraints\Length;
         )
     ]
 )]
-#[Get(normalizationContext: ['groups' => ['info:book']], security: "is_granted('ROLE_USER')")]
+#[Get(normalizationContext: ['groups' => ['info-item:book']], security: "is_granted('ROLE_USER')")]
 #[Delete(security: "is_granted('ROLE_USER')")]
 #[Patch(
     normalizationContext: ['groups' => ['info:book']],
@@ -64,28 +64,28 @@ class Book
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['info:book', 'info:basketItem', 'user:response'])]
+    #[Groups(['info:book', 'info:basketItem', 'user:response', 'info-item:book'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Length(min: 5, groups: ['create:book'])]
-    #[Groups(['create:book', 'info:book', 'update:book', 'info:basketItem'])]
+    #[Groups(['create:book', 'info:book', 'update:book', 'info:basketItem', 'info-item:book'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Length(min: 5, groups: ['create:book'])]
-    #[Groups(['create:book', 'info:book', 'update:book'])]
+    #[Groups(['create:book', 'info:book', 'update:book', 'info-item:book'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['create:book', 'info:book', 'update:book', 'info:basketItem'])]
+    #[Groups(['create:book', 'info:book', 'update:book', 'info:basketItem', 'info-item:book'])]
     private int $price = 0;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'books')]
     private ?User $author = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['info:book'])]
+    #[Groups(['info:book', 'info-item:book'])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(nullable: true)]
@@ -95,10 +95,15 @@ class Book
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: OrderItem::class)]
     private Collection $orderItems;
 
+    #[ORM\OneToMany(mappedBy: 'book', targetEntity: Comment::class)]
+    #[Groups(['info-item:book'])]
+    private Collection $comments;
+
     public function __construct()
     {
         $this->created_at = new \DateTime();
         $this->orderItems = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -202,6 +207,36 @@ class Book
             // set the owning side to null (unless already changed)
             if ($orderItem->getProduct() === $this) {
                 $orderItem->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setBook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getBook() === $this) {
+                $comment->setBook(null);
             }
         }
 
