@@ -76,12 +76,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 30)]
     #[Length(min: 5, max: 30, groups: ['registration:user'])]
-    #[Groups(['registration:user', 'user:response', 'info:order', 'collection-info:order'])]
+    #[Groups(['registration:user', 'user:response', 'info:order', 'collection-info:order', 'info:comment', 'info-item:book'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 30)]
     #[Length(min: 5, max: 30, groups: ['registration:user'])]
-    #[Groups(['registration:user', 'user:response', 'info:order', 'collection-info:order'])]
+    #[Groups(['registration:user', 'user:response', 'info:order', 'collection-info:order', 'info:comment', 'info-item:book'])]
     private ?string $lastName = null;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
@@ -95,10 +95,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Order::class)]
     private Collection $orders;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Comment::class)]
+    private Collection $comments;
+
     public function __construct()
     {
         $this->books = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -262,6 +266,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($order->getOwner() === $this) {
                 $order->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getAuthor() === $this) {
+                $comment->setAuthor(null);
             }
         }
 
