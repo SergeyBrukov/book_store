@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class BasketItemController extends AbstractController
 {
     public function __construct(
-        private BasketItemService $basketItemService
+        private readonly BasketItemService $basketItemService
     )
     {
     }

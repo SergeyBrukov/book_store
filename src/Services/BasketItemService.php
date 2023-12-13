@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Entity\Basket;
 use App\Entity\BasketItem;
-use App\Repository\BasketItemRepository;
 use App\Repository\BasketRepository;
 use App\Repository\BookRepository;
 use App\Repository\UserRepository;
@@ -20,6 +19,7 @@ class BasketItemService
      * @param EntityManagerInterface $entityManager
      * @param UserRepository $userRepository
      * @param SerializerInterface $serializer
+     * @param LoggerService $loggerService
      */
     public function __construct(
         private readonly BasketRepository       $basketRepository,
@@ -27,6 +27,7 @@ class BasketItemService
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository         $userRepository,
         private readonly SerializerInterface    $serializer,
+        private readonly LoggerService          $loggerService
     )
     {
     }
@@ -45,7 +46,7 @@ class BasketItemService
 
         $basketItems = $basket->getBasketItems();
 
-        if (count($basketItems) > 0) {
+        if ($basketItems->count() > 0) {
             foreach ($basketItems as $basketItemExists) {
                 if ($basketItemExists->getBookInfo()->getId() === intval($data['bookInfo'])) {
                     $basketItemExists->setCount($basketItemExists->getCount() + $data['count']);
@@ -54,7 +55,9 @@ class BasketItemService
 
                     $serializedBasketItemInfo = $this->serializer->serialize($basketItemExists, 'json', ['groups' => ['info:basketItem']]);
 
-                    return new JsonResponse(['test' => json_decode($serializedBasketItemInfo)], JsonResponse::HTTP_CREATED);
+                    $this->loggerService->createLog('Add new basket item', LoggerService::LOG__SUCCESS);
+
+                    return new JsonResponse(['item' => json_decode($serializedBasketItemInfo)], JsonResponse::HTTP_CREATED);
                 }
             }
         }
@@ -74,7 +77,9 @@ class BasketItemService
 
         $serializedBasketItemInfo = $this->serializer->serialize($basketItem, 'json', ['groups' => ['info:basketItem']]);
 
-        return new JsonResponse(['test' => json_decode($serializedBasketItemInfo)], JsonResponse::HTTP_CREATED);
+        $this->loggerService->createLog('Add new basket item', LoggerService::LOG__SUCCESS);
+
+        return new JsonResponse(['item' => json_decode($serializedBasketItemInfo)], JsonResponse::HTTP_CREATED);
     }
 
     /**
