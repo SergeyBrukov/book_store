@@ -51,17 +51,15 @@ class OrderService
      *     orderComment: string,
      *     paymentMethod: string
      * } $orderData
-     * @param string $userIdentification
+     * @param User $user
      * @return JsonResponse
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    public function createOrder(array $orderData, string $userIdentification): JsonResponse
+    public function createOrder(array $orderData, User $user): mixed
     {
         $deliveryMethod = $this->deliveryMethodsRepository->find($orderData['deliveryMethod']);
-
-        $user = $this->userRepository->findOneBy(['email' => $userIdentification]);
 
         $basket = $this->basketRepository->findOneBy(['user' => $user->getId()]);
 
@@ -130,14 +128,14 @@ class OrderService
 
         $orderSerializedData = $this->serializer->serialize($newOrder, 'json', ['groups' => ['info:order']]);
 
-        return new JsonResponse(json_decode($orderSerializedData), JsonResponse::HTTP_CREATED);
+        return json_decode($orderSerializedData);
     }
 
     /**
      * @param string $orderId
-     * @return JsonResponse
+     * @return mixed
      */
-    public function getOrderById(string $orderId): JsonResponse
+    public function getOrderById(string $orderId): mixed
     {
         $order = $this->orderRepository->find($orderId);
 
@@ -147,15 +145,15 @@ class OrderService
 
         $orderSerializeData = $this->serializer->serialize($order, 'json', ['groups' => ['info:order']]);
 
-        return new JsonResponse(json_decode($orderSerializeData), JsonResponse::HTTP_OK);
+        return json_decode($orderSerializeData);
     }
 
 
     /**
      * @param string $orderId
-     * @return JsonResponse
+     * @return mixed
      */
-    public function deleteOrderById(string $orderId): JsonResponse
+    public function deleteOrderById(string $orderId): mixed
     {
         $order = $this->orderRepository->find($orderId);
 
@@ -179,6 +177,6 @@ class OrderService
         $this->entityManager->remove($order);
         $this->entityManager->flush();
 
-        return new JsonResponse('You remove order', JsonResponse::HTTP_NO_CONTENT);
+        return 'You remove order';
     }
 }

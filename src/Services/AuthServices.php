@@ -31,9 +31,9 @@ class AuthServices
 
     /**
      * @param RegistrationUserModel $registrationUserData
-     * @return JsonResponse
+     * @return mixed
      */
-    public function registrationUser(RegistrationUserModel $registrationUserData): JsonResponse
+    public function registrationUser(RegistrationUserModel $registrationUserData): mixed
     {
         $candidate = $this->userRepository->findOneBy(['email' => $registrationUserData->getEmail()]);
 
@@ -78,10 +78,10 @@ class AuthServices
 
         $serializeUser = $this->serializer->serialize($user, 'json', ['groups' => 'user:response']);
 
-        return new JsonResponse([
+        return [
             'user'  => json_decode($serializeUser),
             'token' => $token
-        ], JsonResponse::HTTP_CREATED);
+        ];
     }
 
     /**
@@ -128,13 +128,11 @@ class AuthServices
     }
 
     /**
-     * @param string $userIdentification
-     * @return JsonResponse
+     * @param User $user
+     * @return mixed
      */
-    public function userProfile(string $userIdentification): JsonResponse
+    public function userProfile(User $user): mixed
     {
-
-        $user = $this->userRepository->findOneBy(['email' => $userIdentification]);
 
         if (!$user) {
             return new JsonResponse('User not found', JsonResponse::HTTP_BAD_REQUEST);
@@ -144,7 +142,7 @@ class AuthServices
             'groups' => [
                 'user:profile', 'user:response']]);
 
-        return new JsonResponse(json_decode($userSerializedData), JsonResponse::HTTP_OK);
+        return json_decode($userSerializedData);
 
     }
 }

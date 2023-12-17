@@ -7,6 +7,7 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -22,11 +23,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\Validator\Constraints\File;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 #[ApiResource(
     operations: [
         new Post(
+            inputFormats          : ['multipart' => ['multipart/form-data']],
             routeName             : 'app_create_book',
             status                : JsonResponse::HTTP_CREATED,
             controller            : BookController::class,
@@ -39,7 +44,6 @@ use Symfony\Component\Validator\Constraints\Length;
             status                      : JsonResponse::HTTP_OK,
             paginationClientItemsPerPage: true,
             normalizationContext        : ['groups' => ['info:book']],
-            security                    : "is_granted('ROLE_USER')",
             name                        : 'Books info'
         )
     ]
@@ -99,11 +103,26 @@ class Book
     #[Groups(['info-item:book'])]
     private Collection $comments;
 
+    #[ORM\OneToMany(mappedBy: 'book', targetEntity: MediaFiles::class)]
+    #[Groups(['info-item:book'])]
+    private Collection $images;
+
+    #[Vich\UploadableField(mapping: "media_object", fileNameProperty: "filePath")]
+    #[ApiProperty(
+        openapiContext: [
+            'type'   => 'string',
+            'format' => 'binary'
+        ]
+    )]
+    #[Groups(['create:book'])]
+    private ?UploadedFile $imageFile = null;
+
     public function __construct()
     {
         $this->created_at = new \DateTime();
         $this->orderItems = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -241,5 +260,45 @@ class Book
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, MediaFiles>
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(MediaFiles $image): static
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setBook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(MediaFiles $image): static
+    {
+        if ($this->images->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getBook() === $this) {
+                $image->setBook(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getImageFile(): ?UploadedFile
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?UploadedFile $imageFile): void
+    {
+        $this->imageFile = $imageFile;
     }
 }

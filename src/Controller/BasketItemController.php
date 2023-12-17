@@ -2,15 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Basket;
-use App\Entity\BasketItem;
-use App\Entity\Book;
+use App\Entity\User;
 use App\Services\BasketItemService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class BasketItemController extends AbstractController
@@ -29,9 +25,11 @@ class BasketItemController extends AbstractController
     public function addBookInBasket(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $userIdentifier = $this->getUser()->getUserIdentifier();
 
-        return $this->basketItemService->addBookInBasket($data, $userIdentifier);
+        /** @var User $user */
+        $user = $this->getUser();
+
+        return new JsonResponse($this->basketItemService->addBookInBasket($data, $user), JsonResponse::HTTP_CREATED);
     }
 
     /**
@@ -41,9 +39,10 @@ class BasketItemController extends AbstractController
     #[Route('/api/decrement-book-from-basket/{id}', name: 'decrement-book-from-basket', methods: ['PATCH'])]
     public function decrementBookFromBasket(string $id): JsonResponse
     {
-        $userIdentifier = $this->getUser()->getUserIdentifier();
+        /** @var User $user */
+        $user = $this->getUser();
 
-        return $this->basketItemService->decrementBookFromBasket($id, $userIdentifier);
+        return new JsonResponse($this->basketItemService->decrementBookFromBasket($id, $user), JsonResponse::HTTP_OK);
     }
 
     /**
@@ -53,8 +52,9 @@ class BasketItemController extends AbstractController
     #[Route('/api/delete-book-from-basket/{id}', name: 'delete-book-from-basket', methods: ['DELETE'])]
     public function deleteBookFromBasket(string $id): JsonResponse
     {
-        $userIdentifier = $this->getUser()->getUserIdentifier();
+        /** @var User $user */
+        $user = $this->getUser();
 
-        return $this->basketItemService->deleteBookBasket($id, $userIdentifier);
+        return new JsonResponse($this->basketItemService->deleteBookBasket($id, $user), JsonResponse::HTTP_OK);
     }
 }
