@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entity\Basket;
 use App\Entity\BasketItem;
+use App\Entity\User;
 use App\Repository\BasketRepository;
 use App\Repository\BookRepository;
 use App\Repository\UserRepository;
@@ -34,15 +35,15 @@ class BasketItemService
 
     /**
      * @param $data
-     * @param string $userIdentifier
-     * @return JsonResponse
+     * @param User $user
+     * @return array
      */
-    public function addBookInBasket($data, string $userIdentifier): JsonResponse
+    public function addBookInBasket($data, User $user): array
     {
 
         $book = $this->bookRepository->find($data['bookInfo']);
 
-        $basket = $this->getBasketUser($userIdentifier);
+        $basket = $user->getBasket();
 
         $basketItems = $basket->getBasketItems();
 
@@ -57,7 +58,7 @@ class BasketItemService
 
                     $this->loggerService->createLog('Add new basket item', LoggerService::LOG__SUCCESS);
 
-                    return new JsonResponse(['item' => json_decode($serializedBasketItemInfo)], JsonResponse::HTTP_CREATED);
+                    return ['item' => json_decode($serializedBasketItemInfo)];
                 }
             }
         }
@@ -79,17 +80,17 @@ class BasketItemService
 
         $this->loggerService->createLog('Add new basket item', LoggerService::LOG__SUCCESS);
 
-        return new JsonResponse(['item' => json_decode($serializedBasketItemInfo)], JsonResponse::HTTP_CREATED);
+        return ['item' => json_decode($serializedBasketItemInfo)];
     }
 
     /**
      * @param string $basketItemId
-     * @param string $userIdentifier
-     * @return JsonResponse
+     * @param User $user
+     * @return string|JsonResponse
      */
-    public function decrementBookFromBasket(string $basketItemId, string $userIdentifier): JsonResponse
+    public function decrementBookFromBasket(string $basketItemId, User $user): string|JsonResponse
     {
-        $basket = $this->getBasketUser($userIdentifier);
+        $basket = $user->getBasket();
 
         if (count($basket->getBasketItems()) === 0) {
             return new JsonResponse('Basket empty, so you can not use this route.', JsonResponse::HTTP_BAD_REQUEST);
@@ -112,12 +113,18 @@ class BasketItemService
         $basketItemById->setCount($basketItemById->getCount() - 1);
         $this->entityManager->flush();
 
-        return new JsonResponse("Succsess", JsonResponse::HTTP_OK);
+        return "Succsess";
     }
 
-    public function deleteBookBasket(string $basketItemId, string $userIdentifier): JsonResponse
+
+    /**
+     * @param string $basketItemId
+     * @param User $user
+     * @return string|JsonResponse
+     */
+    public function deleteBookBasket(string $basketItemId, User $user): string|JsonResponse
     {
-        $basket = $this->getBasketUser($userIdentifier);
+        $basket = $user->getBasket();
 
         $basketItems = $basket->getBasketItems();
 
@@ -139,7 +146,7 @@ class BasketItemService
         $this->entityManager->remove($basketItemById);
         $this->entityManager->flush();
 
-        return new JsonResponse("Succsess", JsonResponse::HTTP_OK);
+        return "Succsess";
     }
 
     /**
@@ -175,16 +182,5 @@ class BasketItemService
         $basket
             ->setTotalAmount($basket->getTotalAmount() - $totalBasketItemPrice)
             ->setTotalCount($basket->getTotalCount() - $basketItemCount);
-    }
-
-    /**
-     * @param string $userIdentifier
-     * @return Basket|null
-     */
-    private function getBasketUser(string $userIdentifier): ?Basket
-    {
-        $userBasket = $this->userRepository->findOneBy(['email' => $userIdentifier])->getBasket();
-
-        return $this->basketRepository->find($userBasket->getId());
     }
 }

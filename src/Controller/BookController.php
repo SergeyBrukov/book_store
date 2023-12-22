@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Book;
+use App\Entity\User;
 use App\Services\BookService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,12 +13,21 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class BookController extends AbstractController
 {
+    /**
+     * @var BookService
+     */
+    private BookService $bookService;
 
+
+    /**
+     * @param BookService $bookService
+     */
     public function __construct
     (
-        private BookService $bookService
+        BookService $bookService
     )
     {
+        $this->bookService = $bookService;
     }
 
     /**
@@ -27,8 +37,16 @@ class BookController extends AbstractController
     #[Route('/api/create-book', name: 'app_create_book', methods: ['POST'])]
     public function createNewBook(Request $request): JsonResponse
     {
-        $userIdentifier = $this->getUser()->getUserIdentifier();
+        /** @var User $user */
+        $user = $this->getUser();
 
-        return $this->bookService->createNewBool($request, $userIdentifier);
+        $bookData = [
+            'name'        => $request->request->get('name'),
+            'price'       => $request->request->get('price'),
+            'description' => $request->request->get('description'),
+            'imageFile' => $request->files->get('imageFile')
+        ];
+
+        return new JsonResponse($this->bookService->createNewBool($bookData, $user), JsonResponse::HTTP_CREATED);
     }
 }

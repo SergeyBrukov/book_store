@@ -3,10 +3,11 @@
 namespace App\Services;
 
 use App\Entity\Book;
-use App\Repository\UserRepository;
+use App\Entity\MediaFiles;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -15,26 +16,28 @@ class BookService
     public function __construct
     (
         private readonly EntityManagerInterface $entityManager,
-        private readonly UserRepository         $userRepository,
         private readonly ValidatorInterface     $validator,
-        private readonly SerializerInterface    $serializer
+        private readonly SerializerInterface    $serializer,
+        private readonly FileServices           $fileServices
     )
     {
     }
 
     /**
-     * @param Request $request
-     * @param string $userIdentifier
-     * @return JsonResponse
+     * @param array{
+     *     name: string,
+     *     price: int,
+     *     description: string,
+     *     imageFile: UploadedFile } $bookData
+     * @param User $user
+     * @return mixed
      */
-    public function createNewBool(Request $request, string $userIdentifier): JsonResponse
+    public function createNewBool(array $bookData, User $user): mixed
     {
 
-        $user = $this->userRepository->findOneBy(['email' => $userIdentifier]);
-
-        $bookData = json_decode($request->getContent(), true);
-
         $book = new Book();
+        $mediaFile = new MediaFiles();
+
         $book
             ->setName($bookData['name'])
             ->setPrice($bookData['price'])
@@ -53,12 +56,28 @@ class BookService
             return new JsonResponse(['errors' => $errorData], JsonResponse::HTTP_BAD_REQUEST);
         }
 
+        $fileName = md5(uniqid()) . '.' . $bookData['imageFile']->guessExtension();
+
         $this->entityManager->persist($book);
+        $this->entityManager->flush();
+        $fileFolder = $book->getId();
+
+        $mediaFile
+            ->setBook($book)
+            ->setFileSize($bookData['imageFile']->getSize())
+            ->setFileName($bookData['imageFile']->getClientOriginalName())
+            ->setFolder("storage/books/$fileFolder")
+            ->setFilePath($fileName)
+            ->setFileFormat($bookData['imageFile']->getMimeType());
+
+        $this->fileServices->saveImage($fileFolder, $bookData['imageFile'], $fileName, 'books');
+        $this->entityManager->persist($mediaFile);
+        $book->addImage($mediaFile);
         $this->entityManager->flush();
 
         $serializerBook = $this->serializer->serialize($book, 'json', ['groups' => ['info:book']]);
 
-        return new JsonResponse(json_decode($serializerBook), JsonResponse::HTTP_CREATED);
+        return json_decode($serializerBook);
 
     }
 }

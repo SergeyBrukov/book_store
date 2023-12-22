@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entity\Comment;
+use App\Entity\User;
 use App\Repository\BookRepository;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
@@ -37,12 +38,11 @@ class CommentService
      *     book: string,
      *     orderId: int
      * } $commentData
-     * @param string $userIdentifier
-     * @return JsonResponse
+     * @param User $user
+     * @return mixed
      */
-    public function createComment(array $commentData, string $userIdentifier): JsonResponse
+    public function createComment(array $commentData, User $user): mixed
     {
-        $user = $this->userRepository->findOneBy(['email' => $userIdentifier]);
         $orderExits = $this->orderRepository->find($commentData['orderId']);
 
         if (!$orderExits) {
@@ -80,6 +80,6 @@ class CommentService
 
         $serializedCommentData = $this->serializer->serialize($comment, 'json', ['groups' => ['info:comment']]);
 
-        return new JsonResponse(json_decode($serializedCommentData), JsonResponse::HTTP_CREATED);
+        return json_decode($serializedCommentData);
     }
 }

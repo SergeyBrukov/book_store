@@ -2,16 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Services\OrderService;
-use App\Services\TokenService;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -39,19 +35,20 @@ class OrderController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $userIdentification = $this->getUser()->getUserIdentifier();
+        /** @var User $user */
+        $user = $this->getUser();
 
-        return $this->orderService->createOrder($data, $userIdentification);
+        return new JsonResponse($this->orderService->createOrder($data, $user), JsonResponse::HTTP_CREATED);
     }
 
     /**
      * @param string $id
      * @return JsonResponse
      */
-    #[Route('/api/get-order/{id}', name: 'get-order-id', methods: ['GET'] )]
+    #[Route('/api/get-order/{id}', name: 'get-order-id', methods: ['GET'])]
     public function getOrderById(string $id): JsonResponse
     {
-       return $this->orderService->getOrderById($id);
+        return new JsonResponse($this->orderService->getOrderById($id), JsonResponse::HTTP_OK);
     }
 
     /**
@@ -61,6 +58,6 @@ class OrderController extends AbstractController
     #[Route('/api/delete-order/${id}', name: 'delete-order', methods: ['DELETE'])]
     public function deleteOrderById(string $id): JsonResponse
     {
-        return $this->orderService->deleteOrderById($id);
+        return new JsonResponse($this->orderService->deleteOrderById($id), JsonResponse::HTTP_NO_CONTENT);
     }
 }

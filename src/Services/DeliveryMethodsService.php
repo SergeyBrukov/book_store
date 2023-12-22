@@ -21,7 +21,11 @@ class DeliveryMethodsService
     {
     }
 
-    public function createDeliveryMethod($data): JsonResponse
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function createDeliveryMethod($data): mixed
     {
         $name = $data['name'];
         $deliveryPaymentMethodId = $data['deliveryPaymentMethodId'];
@@ -54,6 +58,6 @@ class DeliveryMethodsService
 
         $serializerData = $this->serializer->serialize($newDeliveryMethod, 'json', ['groups' => ['info:deliveryMethod']]);
 
-        return new JsonResponse(json_decode($serializerData), JsonResponse::HTTP_CREATED);
+        return json_decode($serializerData);
     }
 }

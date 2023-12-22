@@ -16,7 +16,7 @@ class DeliveryMethodsController extends AbstractController
      * @param DeliveryMethodsService $deliveryMethodsService
      */
     public function __construct(
-        private DeliveryMethodsService $deliveryMethodsService
+        private readonly DeliveryMethodsService $deliveryMethodsService
     )
     {
     }
@@ -30,6 +30,6 @@ class DeliveryMethodsController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        return $this->deliveryMethodsService->createDeliveryMethod($data);
+        return new JsonResponse($this->deliveryMethodsService->createDeliveryMethod($data), JsonResponse::HTTP_CREATED);
     }
 }

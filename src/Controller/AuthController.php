@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Model\LoginUserModel;
 use App\Model\RegistrationUserModel;
 use App\Services\AuthServices;
@@ -37,7 +38,7 @@ class AuthController extends AbstractController
             ->setFirstName($userData['firstName'])
             ->setLastName($userData['lastName']);
 
-        return $this->authServices->registrationUser($registrationUserData);
+        return new JsonResponse($this->authServices->registrationUser($registrationUserData), JsonResponse::HTTP_CREATED);
 
     }
 
@@ -62,8 +63,9 @@ class AuthController extends AbstractController
     #[Route('/api/profile', name: 'app_user_profile', methods: ['GET'])]
     public function profile(): JsonResponse
     {
-        $userIdentification = $this->getUser()->getUserIdentifier();
+        /** @var User $user */
+        $user = $this->getUser();
 
-        return $this->authServices->userProfile($userIdentification);
+        return new JsonResponse($this->authServices->userProfile($user), JsonResponse::HTTP_OK);
     }
 }
