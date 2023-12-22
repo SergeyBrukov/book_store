@@ -12,27 +12,27 @@ class MediaFiles
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private ?string $folder = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private ?string $filePath = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private ?string $fileName = null;
 
     #[ORM\Column]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private ?int $fileSize = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private ?string $fileFormat = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]

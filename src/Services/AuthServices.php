@@ -76,10 +76,7 @@ class AuthServices
             'email' => $user->getEmail(),
             'roles' => $user->getRoles()]);
 
-        $serializeUser = $this->serializer->serialize($user, 'json', ['groups' => 'user:response']);
-
         return [
-            'user'  => json_decode($serializeUser),
             'token' => $token
         ];
     }
@@ -119,10 +116,7 @@ class AuthServices
             'email' => $user->getEmail(),
             'roles' => $user->getRoles()]);
 
-        $serializeUser = $this->serializer->serialize($user, 'json', ['groups' => 'user:response']);
-
         return new JsonResponse([
-            'user'  => json_decode($serializeUser),
             'token' => $token
         ]);
     }

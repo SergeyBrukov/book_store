@@ -20,12 +20,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
-use Symfony\Component\Validator\Constraints\File;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 #[ApiResource(
@@ -51,9 +50,9 @@ use Symfony\Component\Validator\Constraints\File;
 #[Get(normalizationContext: ['groups' => ['info-item:book']], security: "is_granted('ROLE_USER')")]
 #[Delete(security: "is_granted('ROLE_USER')")]
 #[Patch(
-    normalizationContext: ['groups' => ['info:book']],
+    normalizationContext  : ['groups' => ['info:book']],
     denormalizationContext: ['groups' => ['update:book']],
-    security: "is_granted('ROLE_USER')"
+    security              : "is_granted('ROLE_USER')"
 )]
 #[ApiFilter(OrderFilter::class, properties: ['id' => 'ASC', 'name' => 'DESC'])]
 #[ApiFilter(SearchFilter::class, properties: [
@@ -100,11 +99,11 @@ class Book
     private Collection $orderItems;
 
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Comment::class)]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private Collection $comments;
 
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: MediaFiles::class)]
-    #[Groups(['info-item:book'])]
+    #[Groups(['info-item:book', 'info:book'])]
     private Collection $images;
 
     #[Vich\UploadableField(mapping: "media_object", fileNameProperty: "filePath")]

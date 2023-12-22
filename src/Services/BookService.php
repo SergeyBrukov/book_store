@@ -59,16 +59,18 @@ class BookService
         $fileName = md5(uniqid()) . '.' . $bookData['imageFile']->guessExtension();
 
         $this->entityManager->persist($book);
+        $this->entityManager->flush();
+        $fileFolder = $book->getId();
 
         $mediaFile
             ->setBook($book)
             ->setFileSize($bookData['imageFile']->getSize())
             ->setFileName($bookData['imageFile']->getClientOriginalName())
-            ->setFolder(__DIR__)
+            ->setFolder("storage/books/$fileFolder")
             ->setFilePath($fileName)
             ->setFileFormat($bookData['imageFile']->getMimeType());
 
-        $this->fileServices->saveImage($bookData['imageFile'], $fileName);
+        $this->fileServices->saveImage($fileFolder, $bookData['imageFile'], $fileName, 'books');
         $this->entityManager->persist($mediaFile);
         $book->addImage($mediaFile);
         $this->entityManager->flush();

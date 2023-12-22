@@ -33,12 +33,27 @@ class FileServices
 
     }
 
-    public function saveImage(UploadedFile $image, string $fileName):void
+    /**
+     * @param $fileFolder
+     * @param UploadedFile $image
+     * @param string $fileName
+     * @param string $entityFolderName
+     * @return void
+     */
+    public function saveImage($fileFolder, UploadedFile $image, string $fileName, string $entityFolderName):void
     {
-        if ($this->filesystem->exists('storage')) {
+        if (!$this->filesystem->exists('storage')) {
             $this->filesystem->mkdir('storage');
         }
 
-        $image->move($this->baseFolder . $this->storageWay, $fileName);
+        if (!$this->filesystem->exists('storage' . $entityFolderName)) {
+            $this->filesystem->mkdir('storage' . '/' . $entityFolderName);
+        }
+
+        if (!$this->filesystem->exists('storage' . $fileFolder)) {
+            $this->filesystem->mkdir('storage' . '/' . $entityFolderName . '/' . $fileFolder);
+        }
+
+        $image->move('storage' . '/' . $entityFolderName . '/' . $fileFolder, $fileName);
     }
 }
