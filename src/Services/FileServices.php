@@ -30,7 +30,6 @@ class FileServices
         }
 
         $this->filesystem->dumpFile($this->baseFolder . $this->storageWay . '/' . $fileName, $data);
-
     }
 
     /**

@@ -6,6 +6,12 @@
 parameters:
 
 services:
+    'App\Filter\CustomBookFilter':
+        arguments:
+            $properties:
+                - 'name'
+        tags:
+            - { name: 'api_platform.filter' }
     Predis\Client:
         class: Predis\Client
         arguments:

@@ -2,12 +2,17 @@
 
 namespace App\Services;
 
+use ApiPlatform\Doctrine\Orm\Util\QueryNameGenerator;
+use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use App\Entity\Book;
 use App\Entity\MediaFiles;
 use App\Entity\User;
+use App\Filter\CustomBookFilter;
+use App\Repository\BookRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -18,7 +23,9 @@ class BookService
         private readonly EntityManagerInterface $entityManager,
         private readonly ValidatorInterface     $validator,
         private readonly SerializerInterface    $serializer,
-        private readonly FileServices           $fileServices
+        private readonly FileServices           $fileServices,
+        private readonly BookRepository         $bookRepository,
+        private readonly CustomBookFilter       $customBookFilter
     )
     {
     }
@@ -78,6 +85,28 @@ class BookService
         $serializerBook = $this->serializer->serialize($book, 'json', ['groups' => ['info:book']]);
 
         return json_decode($serializerBook);
+    }
 
+    /**
+     * @param User $user
+     * @param Request $request
+     * @return mixed
+     */
+    function getMyBooks(User $user, Request $request): mixed
+    {
+        $queryBuilder = $this->bookRepository->createQueryBuilder('o');
+
+        $queryBuilder
+            ->andWhere('o.author = :author')
+            ->setParameter('author', $user->getId());
+
+        $context = ['filters' => $request->query->all()];
+        $this->customBookFilter->apply($queryBuilder, new QueryNameGenerator(), Book::class, null, $context);
+
+        $books = $queryBuilder->getQuery()->getResult();
+
+        $serializerBooks = $this->serializer->serialize($books, 'json', ['groups' => ['info:book']]);
+
+        return json_decode($serializerBooks);
     }
 }
