@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Controller\AuthController;
 use App\Repository\UserRepository;
@@ -44,6 +45,8 @@ use Symfony\Component\Validator\Constraints\Length;
         )
     ]
 )]
+#[GetCollection(status: JsonResponse::HTTP_OK, normalizationContext: ['groups' => ['user:response']], security: "is_granted('ROLE_ADMIN')")]
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
@@ -54,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['registration:user', 'info:order'])]
+    #[Groups(['registration:user', 'info:order', 'info-item:book', 'user:profile'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]

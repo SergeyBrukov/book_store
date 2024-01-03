@@ -134,7 +134,9 @@ class AuthServices
 
         $userSerializedData = $this->serializer->serialize($user, 'json', [
             'groups' => [
-                'user:profile', 'user:response']]);
+                'user:profile', 'user:response'
+            ]
+        ]);
 
         return json_decode($userSerializedData);
 

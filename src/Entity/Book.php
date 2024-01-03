@@ -2,11 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
-use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
-use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -15,6 +10,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Controller\BookController;
+use App\Filter\CustomBookFilter;
 use App\Repository\BookRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -41,9 +37,50 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
         new GetCollection(
             uriTemplate                 : 'get-books',
             status                      : JsonResponse::HTTP_OK,
+            openapiContext              : [
+                'parameters' => [
+                    [
+                        'name'        => 'name',
+                        'in'          => 'query',
+                        'description' => 'Book title',
+                        'schema'      => [
+                            'type' => 'string',
+                        ],
+                    ],
+                    [
+                        'name'        => 'price',
+                        'in'          => 'query',
+                        'description' => 'Book price',
+                        'schema'      => [
+                            'type' => 'number',
+                        ],
+                    ],
+                ],
+            ],
             paginationClientItemsPerPage: true,
             normalizationContext        : ['groups' => ['info:book']],
+            filters                     : [CustomBookFilter::class],
             name                        : 'Books info'
+        ),
+        new GetCollection(
+            routeName                   : 'app_get_my_books',
+            status                      : JsonResponse::HTTP_OK,
+            controller                  : BookController::class,
+            openapiContext              : [
+                'parameters' => [
+                    [
+                        'name'        => 'name',
+                        'in'          => 'query',
+                        'description' => 'Book title',
+                        'schema'      => [
+                            'type' => 'string',
+                        ],
+                    ],
+                ],
+            ],
+            paginationClientItemsPerPage: true,
+            normalizationContext        : ['groups' => ['info:book']],
+            name                        : 'My books info',
         )
     ]
 )]
@@ -54,14 +91,14 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
     denormalizationContext: ['groups' => ['update:book']],
     security              : "is_granted('ROLE_USER')"
 )]
-#[ApiFilter(OrderFilter::class, properties: ['id' => 'ASC', 'name' => 'DESC'])]
-#[ApiFilter(SearchFilter::class, properties: [
-    'id'               => 'partial',
-    'name'             => 'partial',
-    'author.firstName' => 'partial'
-])]
-#[ApiFilter(RangeFilter::class, properties: ['price'])]
-#[ApiFilter(DateFilter::class, properties: ['created_at' => DateFilter::EXCLUDE_NULL])]
+//#[ApiFilter(OrderFilter::class, properties: ['id' => 'ASC', 'name' => 'DESC'])]
+//#[ApiFilter(SearchFilter::class, properties: [
+//    'id'               => 'partial',
+//    'name'             => 'partial',
+//    'author.firstName' => 'partial'
+//])]
+//#[ApiFilter(RangeFilter::class, properties: ['price'])]
+//#[ApiFilter(DateFilter::class, properties: ['created_at' => DateFilter::EXCLUDE_NULL])]
 class Book
 {
     #[ORM\Id]
@@ -75,8 +112,8 @@ class Book
     #[Groups(['create:book', 'info:book', 'update:book', 'info:basketItem', 'info-item:book'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    #[Length(min: 5, groups: ['create:book'])]
+    #[ORM\Column(length: 1000)]
+    #[Length(min: 5, max: 1000, maxMessage: "Description too long", groups: ['create:book', 'update:book'])]
     #[Groups(['create:book', 'info:book', 'update:book', 'info-item:book'])]
     private ?string $description = null;
 
@@ -85,6 +122,7 @@ class Book
     private int $price = 0;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'books')]
+    #[Groups(['info-item:book'])]
     private ?User $author = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
